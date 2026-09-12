@@ -1,0 +1,162 @@
+# A.01.8 — PRE-REGISTERED CLAIMS
+# Locked at Phase 0, BEFORE any training run was executed.
+# Do not edit after the first run. Divergences are reported, not fixed.
+#
+# Target paper:
+#   Wilson, Roelofs, Stern, Srebro, Recht (2017),
+#   "The Marginal Value of Adaptive Gradient Methods in Machine Learning",
+#   NeurIPS 2017. arXiv:1705.08292
+#   Claims taken from Section 4 (CIFAR-10 experiment) and Appendix B/D.
+
+meta:
+  preregistered_utc: "2026-09-12T17:05:00Z"
+  paper_task: "CIFAR-10, VGG+BN+Dropout (cifar.torch), 5 optimizers, log-spaced LR grid"
+  paper_seeds: 5
+  paper_lr_selection_rule: "lowest TRAINING loss at the end of the fixed epoch budget (no dev set used for CIFAR-10)"
+
+# Numbers as published, transcribed verbatim from the paper.
+paper_reported:
+  best_lr:
+    sgd: 0.5
+    heavy_ball: 0.5
+    adagrad: 0.01
+    rmsprop: 0.0003
+    adam: 0.0003
+  lr_grid:
+    sgd: [2, 1, 0.5, 0.25, 0.05, 0.01]
+    heavy_ball: [2, 1, 0.5, 0.25, 0.05, 0.01]
+    adagrad: [0.1, 0.05, 0.01, 0.0075, 0.005]
+    rmsprop: [0.005, 0.001, 0.0005, 0.0003, 0.0001]
+    adam: [0.005, 0.001, 0.0005, 0.0003, 0.0001, 0.00005]
+  best_nonadaptive_test_error_pct: 7.65
+  best_nonadaptive_test_error_std_pct: 0.14
+  best_nonadaptive_optimizer: sgd
+  best_adaptive_test_error_pct: 9.60
+  best_adaptive_test_error_std_pct: 0.19
+  best_adaptive_optimizer: rmsprop
+  headline_gap_pct_points: 1.95
+  defaults:
+    adagrad: 0.01     # paper notes the default was also the best
+    rmsprop: 0.001    # torch default; NOT selected
+    adam: 0.001       # NOT selected
+
+claims:
+
+  C1:
+    name: "Generalization gap: non-adaptive beats adaptive at tuned LR"
+    paper_statement: >
+      "The best overall test error found by a non-adaptive algorithm, SGD, was 7.65 +/- 0.14%,
+      whereas the best adaptive method, RMSProp, achieved a test error of 9.60 +/- 0.19%."
+      Adaptive methods "find solutions that generalize worse than those found by non-adaptive methods".
+    quantity: "min over {sgd, heavy_ball} of mean test error at selected LR, vs min over {adagrad, rmsprop, adam}"
+    verdict_rule: >
+      REPRODUCED if best_nonadaptive_mean < best_adaptive_mean AND the gap exceeds
+      2 * pooled seed std of the two arms. DIVERGED if the sign flips or the gap is
+      within 2 pooled std (i.e. indistinguishable from seed noise).
+    direction_expected: "non-adaptive lower"
+    paper_gap_pct_points: 1.95
+
+  C2:
+    name: "Adaptive methods reach equal or lower TRAINING loss"
+    paper_statement: >
+      Adaptive methods find worse-generalizing solutions "despite achieving the same training
+      loss or lower than non-adaptive methods".
+    quantity: "min final train loss over adaptive optimizers vs min over non-adaptive optimizers (at each optimizer's selected LR)"
+    verdict_rule: >
+      REPRODUCED if min_adaptive_train_loss <= min_nonadaptive_train_loss (tolerance 0.01 nats).
+      DIVERGED otherwise.
+
+  C3:
+    name: "Tuned learning rates span orders of magnitude across optimizers"
+    paper_statement: >
+      Appendix D: selected LR is 0.5 for SGD and heavy ball, 0.0003 for RMSProp and Adam
+      (a factor of ~1667), 0.01 for AdaGrad.
+    quantity: "ratio of selected LR (non-adaptive) to selected LR (Adam/RMSProp); plus exact per-optimizer LR match"
+    verdict_rule: >
+      REPRODUCED if ratio >= 100x. Separately report, per optimizer, whether OUR selected LR
+      equals the paper's selected LR (exact-match table). Exact match is reported but is NOT
+      required for C3 to be marked reproduced.
+
+  C4:
+    name: "Default learning rates are rarely optimal"
+    paper_statement: >
+      "the defaults are rarely optimal" - in the paper's CIFAR-10 run, Adam's default 0.001 and
+      RMSProp's default 0.001 were not selected, while AdaGrad's default 0.01 was.
+    quantity: "for each of adagrad/rmsprop/adam, is the selected LR equal to the library default?"
+    verdict_rule: >
+      REPRODUCED if Adam's default (0.001) is NOT the selected LR. Report the full table
+      regardless; note explicitly if AdaGrad's default is again selected.
+
+  C5:
+    name: "OBSESSION MARKER - seed-to-seed variance vs the headline gap"
+    paper_statement: >
+      The paper averages 5 runs from random initialisations and reports +/- 1 std of
+      0.14 (SGD) and 0.19 (RMSProp) percentage points.
+    quantity: >
+      Per-configuration std of test error across our 5 seeds; the seed-level win rate
+      (fraction of the 25 non-adaptive x adaptive seed pairings in which the non-adaptive
+      seed actually has lower test error); and the ratio gap / pooled_std.
+    verdict_rule: >
+      No pass/fail. MUST report: (a) our seed std at every selected setting, (b) whether it is
+      larger or smaller than the paper's ~0.15pp, (c) the seed-level win rate, and (d) a plain
+      statement of whether the variance is large enough to make the paper's headline claim less
+      certain than it reads. Reporting only means, or a variance of exactly zero, fails the artifact.
+
+  C6:
+    name: "Learning rate dominates optimizer choice as a source of variation"
+    paper_statement: >
+      Implicit in the paper's protocol and stated in its conclusions: tuning the step size is
+      the decisive hyperparameter choice; adaptive methods do not remove the need to tune it.
+    quantity: >
+      Within-optimizer spread of test error across the LR grid (best minus worst finite run),
+      compared with between-optimizer spread at each optimizer's tuned LR.
+    verdict_rule: >
+      REPRODUCED if median within-optimizer LR spread > between-optimizer spread at tuned LR.
+      DIVERGED otherwise. Runs that diverge to NaN are counted as failures and reported
+      separately, not silently dropped.
+
+# Deviations from the original setup, declared in advance.
+declared_deviations:
+  - id: D1
+    what: "Architecture: 3-conv VGG-style net (16/32/64 channels, BN, 128-unit head) instead of VGG16."
+    why: "2 CPU cores, no GPU. VGG16 x 28 configs x 5 seeds is GPU-days."
+    expected_effect: "Absolute test errors will be far worse than 7.65/9.60. Relative claims remain testable."
+  - id: D2
+    what: "Training set: fixed 2,000-image subset of the 50,000 CIFAR-10 training images. Full 10,000-image test set."
+    why: "Compute budget, and to reach the near-zero-training-loss regime the paper's claim presumes."
+    expected_effect: "Much larger absolute test error; a real train/test gap, which is the regime C1 and C2 are about."
+  - id: D3
+    what: "Epoch budget: 30 epochs with fixed-decay (x0.5 every 6 epochs), not the paper's ~100+ epochs."
+    why: "Compute budget."
+    expected_effect: "High learning rates are penalised less by long training; late-training divergence may be missed."
+  - id: D4
+    what: "Data source: CIFAR-10 obtained as JPEG re-encodings from a GitHub mirror, not the canonical binary release."
+    why: "cs.toronto.edu is blocked by this sandbox's egress policy."
+    expected_effect: "Small pixel-level differences from the canonical dataset. Logged for honesty; effect expected to be negligible relative to D1-D3."
+  - id: D5
+    what: "Weight decay set to 0 for all optimizers; augmentation limited to random horizontal flips."
+    why: "The paper does not report weight decay, batch size, decay factor or augmentation for CIFAR-10. Nonzero L2 would confound adaptive methods (the AdamW issue) and is not specified."
+    expected_effect: "Removes a confound; also documents an under-specification in the original."
+  - id: D6
+    what: "Batch size 64; RMSProp decay 0.99, eps 1e-8; heavy-ball momentum 0.9; Adam b1=0.9 b2=0.999 eps=1e-8."
+    why: "Paper does not report these. Values are the Torch/standard defaults the paper's codebase would have used."
+    expected_effect: "Unknown; recorded so the choice is falsifiable."
+  - id: D7
+    what: "Inputs downsampled from 32x32 to 16x16 by 2x2 average pooling."
+    why: "5x cheaper per step on CPU; the only way to fit 140 runs into the compute budget."
+    expected_effect: "Higher absolute error for every optimizer. No reason to expect it to favour one optimizer family."
+  - id: D8
+    what: "Dropout disabled (the paper's net is VGG+BN+Dropout)."
+    why: >
+      Pilot runs (logged in RUNS_LOG.md, before the sweep): with dropout 0.25/0.5 the scaled-down
+      net could not drive training error below ~45%, so the paper's premise -- adaptive and
+      non-adaptive methods reaching comparable, near-zero training loss -- was never reached and
+      C1/C2 would have been untestable. With dropout off, training error reaches 0.0%.
+    expected_effect: "Puts the comparison in the paper's regime (both families fit the training set) at the cost of one more architectural difference."
+
+held_fixed_from_paper:
+  - "Exact LR grids per optimizer, transcribed from Appendix D."
+  - "The five optimizers: SGD, heavy ball, AdaGrad, RMSProp, Adam."
+  - "5 random seeds per configuration."
+  - "LR selection by lowest final TRAINING loss (the paper's rule), not by test error."
+  - "Fixed-decay schedule family (constant factor every k epochs)."
