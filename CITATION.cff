@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+title: "Does the adaptive-vs-SGD generalization gap survive seed noise at small scale? A reduced-scale reproduction of Wilson et al. (2017)"
+message: "If you use this reproduction, please cite both this artifact and the original paper."
+type: software
+authors:
+  - given-names: Naf
+    email: nafeelahmad05@gmail.com
+abstract: >-
+  An independent, pre-registered reproduction of the CIFAR-10 learning-rate sensitivity
+  experiment in Wilson et al. (2017), "The Marginal Value of Adaptive Gradient Methods in
+  Machine Learning". 140 runs (the paper's exact learning-rate grids x 5 optimizers x 5 seeds)
+  on a reduced-scale CNN. The paper's headline generalization gap between non-adaptive and
+  adaptive methods does not reproduce and inverts within seed noise; three other claims,
+  including the dominance of learning rate over optimizer choice, reproduce.
+keywords:
+  - reproducibility
+  - optimization
+  - learning rate
+  - adaptive gradient methods
+  - CIFAR-10
+license: MIT
+references:
+  - type: article
+    title: "The Marginal Value of Adaptive Gradient Methods in Machine Learning"
+    authors:
+      - family-names: Wilson
+        given-names: Ashia C.
+      - family-names: Roelofs
+        given-names: Rebecca
+      - family-names: Stern
+        given-names: Mitchell
+      - family-names: Srebro
+        given-names: Nathan
+      - family-names: Recht
+        given-names: Benjamin
+    year: 2017
+    collection-title: "Advances in Neural Information Processing Systems 30 (NeurIPS 2017)"
+    url: "https://arxiv.org/abs/1705.08292"
