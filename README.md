@@ -17,7 +17,7 @@ our best non-adaptive method (SGD, 50.36 ± 0.69%) was *worse* than our best ada
 0.69pp. Across all 25 seed-to-seed pairings, the non-adaptive run won only **36%** of the time.
 At the same time, three of the paper's other claims reproduced cleanly, including the one that
 matters most for practice: **learning rate dominates optimizer choice by roughly 8.5×**. The
-honest summary is that at 2,000 training images and a 60k-parameter network, *which* optimizer you
+honest summary is that at 2,000 training images and a 58,010-parameter network, *which* optimizer you
 use is a coin flip and *what learning rate you give it* is everything.
 
 | claim | what the paper says | what we found | verdict |
