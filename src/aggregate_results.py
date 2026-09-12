@@ -94,6 +94,21 @@ def main():
                    paper_gap=PAPER["gap"],
                    verdict="REPRODUCED" if c1_ok else "DIVERGED")
 
+    # ------------------------------------------------- C1b: the most generous alternative
+    # If the LR had been selected by TEST error instead (which the paper does not do, and
+    # which leaks the test set), would the claim hold? Reported so that the divergence
+    # cannot be blamed on the selection rule.
+    best_by_test = {o: t[(t.optimizer == o) & t.finite].test_err_mean.min() for o in ORDER}
+    na_b = min(NON_ADAPTIVE, key=lambda o: best_by_test[o])
+    ad_b = min(ADAPTIVE, key=lambda o: best_by_test[o])
+    gap_b = float(best_by_test[ad_b] - best_by_test[na_b])
+    S["C1b_test_selected"] = dict(
+        note="oracle selection by test error; not the paper's rule",
+        best_nonadaptive=na_b, err=float(best_by_test[na_b]),
+        best_adaptive=ad_b, adaptive_err=float(best_by_test[ad_b]),
+        gap_pct_points=gap_b, gap_over_pooled_std=gap_b / pooled,
+        verdict="REPRODUCED" if gap_b > 2 * pooled else "DIVERGED")
+
     # ---------------------------------------------------------------- C2
     min_ad_tl = float(min(rows[o].train_loss_mean for o in ADAPTIVE))
     min_na_tl = float(min(rows[o].train_loss_mean for o in NON_ADAPTIVE))
