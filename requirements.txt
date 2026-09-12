@@ -1,0 +1,8 @@
+jax==0.10.2
+jaxlib
+optax
+flax==0.12.8
+numpy
+pandas
+matplotlib
+pillow
