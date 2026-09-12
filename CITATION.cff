@@ -19,6 +19,14 @@ keywords:
   - adaptive gradient methods
   - CIFAR-10
 license: MIT
+doi: 10.5281/zenodo.22729513
+version: 1.0.0
+date-released: 2026-09-12
+repository-code: "https://github.com/NafeelAhmad/learning-rate-sensitivity-reproduction"
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.22729513
+    description: "Zenodo archive of this artifact"
 references:
   - type: article
     title: "The Marginal Value of Adaptive Gradient Methods in Machine Learning"

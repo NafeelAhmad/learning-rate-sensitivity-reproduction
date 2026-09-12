@@ -1,5 +1,8 @@
 # Does the adaptive-vs-SGD generalization gap survive seed noise at small scale?
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22729513.svg)](https://doi.org/10.5281/zenodo.22729513)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 **An independent reproduction of the CIFAR-10 learning-rate sensitivity experiment in
 Wilson et al. (2017), *The Marginal Value of Adaptive Gradient Methods in Machine Learning*.**
 
